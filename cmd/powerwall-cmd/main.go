@@ -10,15 +10,13 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/jessevdk/go-flags"
-
 	"github.com/foogod/go-powerwall"
+	"github.com/jessevdk/go-flags"
+	log "github.com/sirupsen/logrus"
 )
 
 var options struct {
@@ -62,7 +60,7 @@ func main() {
 	c.SetRetry(options.RetryInterval, options.RetryTimeout)
 
 	if options.CertFile != "" && options.Args.Command != "fetchcert" {
-		pemCert, err := ioutil.ReadFile(options.CertFile)
+		pemCert, err := os.ReadFile(options.CertFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot read cert file: %s\n", err)
 			os.Exit(2)
@@ -83,7 +81,7 @@ func main() {
 
 	authToken := ""
 	if options.AuthCache != "" {
-		authdata, err := ioutil.ReadFile(options.AuthCache)
+		authdata, err := os.ReadFile(options.AuthCache)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				// This is ok
@@ -103,7 +101,7 @@ func main() {
 			panic(err)
 		}
 		pemCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
-		err = ioutil.WriteFile(options.CertFile, pemCert, 0644)
+		err = os.WriteFile(options.CertFile, pemCert, 0644)
 		if err != nil {
 			panic(err)
 		}
